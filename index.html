@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <style>
+        .opendata {
+            overflow: hidden;
+            overflow-y: scroll;
+            height: 525px;
+            font-size: 14px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0px;
+            border: 1px solid #000000;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: auto;
+            border: 1px solid #000000;
+        }
+
+        th,
+        td {
+            padding: 8px 15px;
+            border: 1px solid #000000;
+        }
+
+        th {
+            background: #a0a0a0;
+        }
+
+        td {
+            background: #e0e0e0;
+        }
+
+        .btn {
+            border: 1px solid black;
+            padding: 5px;
+            font-family: Arial, sans-serif;
+            font-size: larger;
+            text-align: center;
+            background-color: rgb(235, 70, 70);
+
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.8) 0 100%), url("Firefox.gif");
+            background-size: cover;
+            background-position: center center;
+
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: white;
+            display: block;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 40px;
+            margin-top: 25px;
+        }
+
+        #topbar {
+            height: 100px;
+            float: center;
+            margin-left: 0px;
+            margin-right: 0px;
+            top: 0;
+            left: 0;
+            background-color: rgb(6, 60, 122);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .topbar2 {
+            height: 25px;
+            float: center;
+            margin-left: 0px;
+            margin-right: 0px;
+            top: 0;
+            left: 0;
+            background-color: rgb(6, 60, 122);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <br></br>
+        <div id="topbar">
+            <h1><b>NYC Eviction Data</b> (2017 - Present)</h1>
+        </div>
+        <br>
+        <br>
+        <div id="button">
+            <p style="text-align:center; font-size: 24px; font-weight: bold;">Press this <u>button</u> to view data
+                generated charts:</p>
+            <p><input type="button" class="btn btn-primary" id="btn_1"
+                    value="&#8594;&nbsp;&nbsp;&nbsp;Show Eviction Data Charts&nbsp;&nbsp;&nbsp;&#8592;"></p>
+            <br>
+        </div>
+        <div id="button2">
+            <p style="text-align:center; font-size: 24px; font-weight: bold;">Press this <u>button</u> to view data
+                table:</p>
+            <p><input type="button" class="btn btn-primary" id="btn_2"
+                    value="&#8594;&nbsp;&nbsp;&nbsp;Show Eviction Data Table&nbsp;&nbsp;&nbsp;&#8592;"></p>
+            <br>
+        </div>
+        <div class="topbar2"></div>
+        <div id="graphs">
+            <div id="textDisplayed11"></div>
+            <div id="textDisplayed1"></div>
+            <div id="textDisplayed4"></div>
+        </div>
+        <br>
+        <div class="topbar2"></div>
+        <div id="graphs2">
+            <div id="textDisplayed22"></div>
+            <div id="textDisplayed2"></div>
+            <div id="textDisplayed3"></div>
+        </div>
+    </div>
+    </div>
+
+    <div class="container2">
+        <div class="opendata">
+            <table id='table'>
+                <thead>
+                    <tr>
+                        <th colspan="4"
+                            style="font-size:x-large; color: white; text-align: center; background: rgb(6, 60, 122);">
+                            E V I C T I O N S</th>
+                    </tr>
+                    <tr>
+                        <th>Date</th>
+                        <th>Address</th>
+                        <th>Borough</th>
+                        <th>Zip Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+        </div>
+    </div>
+</body>
+<script>
+
+    //==========================================================================================================================================
+
+    function displayEvictionsPieChart() {
+
+        $.getJSON("https://data.cityofnewyork.us/resource/6z8x-wfk4.json?$limit=100000", function (evictions) {
+            console.log(evictions);
+
+            var borNames = [];
+            var borNumbers = [];
+            let count = evictions.length;
+
+            for (let i = 0; i < evictions.length; i++) {
+                let borough = evictions[i]['borough'];
+                if (borNames.indexOf(borough) == -1) {
+                    borNames.push(borough);
+                    borNumbers.push(0);
+                }
+                borNumbers[borNames.indexOf(borough)] += 1;
+            }
+            //---------------------------------------------
+
+            //sums number of evictions for the '%' calculations
+            let sum = 0;
+            for (let i = 0; i < borNumbers.length; i++) {
+                sum += borNumbers[i];
+            }
+            //sorts borNumbers array in descending order and matches borNames with the new order
+            //used to make the pie chart look more aesthetic and easier to comprehend
+            for (let i = 0; i < borNumbers.length; i++) {
+                for (let j = i + 1; j < borNumbers.length; j++) {
+                    let temp = 0;
+                    let temp2 = '';
+                    if (borNumbers[i] < borNumbers[j]) {
+                        temp = borNumbers[i]
+                        temp2 = borNames[i];
+                        borNumbers[i] = borNumbers[j];
+                        borNames[i] = borNames[j];
+                        borNumbers[j] = temp;
+                        borNames[j] = temp2;
+                    }
+                }
+            }
+            //---------------------------------------------
+            var imageChartData = '';
+            var imageChartLabels = '';
+            var newImageChartLabels = '';
+            for (let i = 0; i < borNames.length; i++) {
+                imageChartLabels += (borNames[i] +
+                    " (" + ((borNumbers[i] / sum) * 100).toFixed(1) + "%)");
+
+                newImageChartLabels += borNames[i];
+                imageChartData += borNumbers[i];
+
+                console.log(newImageChartLabels);
+
+                if (i < borNames.length - 1) {
+                    newImageChartLabels += '|';
+                    imageChartLabels += '|';
+                    imageChartData += ','
+                }
+            }
+            newImageChartLabels = newImageChartLabels.replace("STATEN ISLAND", "S.I.");
+            console.log(imageChartData);
+            console.log(imageChartLabels);
+
+            var imageHTMLcode =
+                '<img src="https://image-charts.com/chart?cht=pd&chco=5164f7%2C9acd32&chs=800x500&chli=Total Evictions%3A%20' + count + '&chdl=' + imageChartLabels + '&chtt=Eviction%20Rates%20%28%25%29%20by%20Borough&chd=t:'
+                + imageChartData + '&chds=0, ' + sum + '&chl=' + newImageChartLabels + '" alt="Static Chart" style="border: 5px solid black"/>';
+
+            console.log(imageHTMLcode);
+            $('#textDisplayed1').html(imageHTMLcode);
+        });
+
+    }
+
+    //==========================================================================================================================================
+
+    function displayEvictionsTrendChart() {
+
+        $.getJSON("https://data.cityofnewyork.us/resource/6z8x-wfk4.json?$limit=100000", function (evictions) {
+
+            var evicYears = [];
+            var evicCount = [];
+
+            for (let i = 0; i < evictions.length; i++) {
+                let temp = evictions[i]['executed_date'];
+                let year = temp.substr(0, 4);
+                if (evicYears.indexOf(year) == -1) {
+                    evicYears.push(year);
+                    evicCount.push(0);
+                }
+                evicCount[evicYears.indexOf(year)] += 1;
+            }
+            //---------------------------------------------
+
+            for (let i = 0; i < evicYears.length; i++) {
+                for (let j = i + 1; j < evicYears.length; j++) {
+                    let temp = '';
+                    let temp2 = 0;
+                    if (parseInt(evicYears[i]) > parseInt(evicYears[j])) {
+                        temp = evicYears[i];
+                        temp2 = evicCount[i];
+                        evicYears[i] = evicYears[j];
+                        evicCount[i] = evicCount[j];
+                        evicYears[j] = temp;
+                        evicCount[j] = temp2;
+                    }
+                }
+            }
+            var maxYear = evicYears[evicYears.length - 1];
+            console.log(maxYear);
+
+            //---------------------------------------------
+
+            var imageChartData = '';
+            var imageChartLabels = '';
+            var imageChartLabels2 = '';
+
+            for (let i = 0; i < evicYears.length; i++) {
+                imageChartLabels += evicYears[i];
+                imageChartLabels2 += evicYears[i];
+                imageChartData += evicCount[i];
+                if (i < evicYears.length - 1) {
+                    imageChartLabels += ',';
+                    imageChartLabels2 += '|';
+                    imageChartData += ',';
+                }
+            }
+
+            console.log(imageChartData);
+            console.log(imageChartLabels);
+            console.log(imageChartLabels2);
+
+            var imageHTMLcode =
+                '<img src="https://image-charts.com/chart?chco=FF0000&chls=2%2C4%2C3&chd=t:'
+                + imageChartLabels + '|' + imageChartData + '&chg=1%2C1&chm=o%2C000000%2C0%2C-1%2C7&chs=800x400&cht=lxy&chtt=%23%20of%20Evictions%20by%20Year&chxl=0:|'
+                + imageChartLabels2 + '&chxr=0%2C2017%2C' + maxYear + '&chxt=x%2Cy" alt="Static Chart" style="border: 5px solid black"/>';
+
+            console.log(imageHTMLcode);
+            $('#textDisplayed2').html(imageHTMLcode);
+        });
+    }
+
+    //==========================================================================================================================================
+
+    $.getJSON("https://data.cityofnewyork.us/resource/6z8x-wfk4.json?$limit=1000", function (data) {
+
+        var eviction = '';
+        $.each(data, function (key, value) {
+
+            eviction += '<tr>';
+            eviction += '<td>' + value.executed_date.substr(0, 10) + '</td>';
+            eviction += '<td>' + value.eviction_address + '</td>';
+            eviction += '<td>' + value.borough + '</td>';
+            eviction += '<td>' + value.eviction_zip + '</td>';
+            eviction += '</tr>';
+        });
+
+        $('#table').append(eviction);
+    });
+    $('#table').append("</tbody>");
+
+    //==========================================================================================================================================
+
+
+    $(".topbar2").hide();
+    $("#button2").hide();
+
+    //==========================================================================================================================================
+    //============================================ vvv [This is messy but it works] vvv ========================================================
+    //==========================================================================================================================================
+
+    //click handler
+
+    $('#btn_1').css({ "display": "block", "margin-left": "auto", "margin-right": "auto", "width": "30%" })
+    $('#btn_1').click(function () {
+        $("html,body").css({ "height": "null" });
+        //----------------------
+        $("#textDisplayed11").html("This pie chart displays the eviction rate percentages in NYC by borough for all evictions since 2017.");
+        displayEvictionsPieChart();
+        $("#textDisplayed4").html("** Data includes both completed evictions and pending evictions.");
+        $("#textDisplayed22").html("This line trend chart displays the number of evictions per year cumulative of all boroughs in NYC.");
+        displayEvictionsTrendChart();
+        $("#textDisplayed3").html("** NYC COVID-19 Eviction Moratorium in place from March 7,2020 to January 15, 2022.<br><b>Tenants were unable to be evicted during this period if they could prove financial hardship.<br><br><br>");
+        //-----------------
+        $("#button").hide();
+        $("#button2").show();
+        $(".container2").hide();
+        $(".topbar2").show();
+        $("#textDisplayed11").show();
+        $("#textDisplayed4").show();
+        $("#textDisplayed22").show();
+        $("#textDisplayed3").show();
+
+        //css for divs
+        $("#textDisplayed11").css({ "text-align": "center", "font-size": "150%", "padding-bottom": "20px", "padding-top": "20px", "background-color": "clear" });
+        $("#textDisplayed22").css({ "text-align": "center", "font-size": "150%", "padding-bottom": "20px", "padding-top": "20px", "background-color": "clear" })
+        $("#textDisplayed1").css({ "display": "block", "margin-left": "auto", "margin-right": "auto", "width": "72%" })
+        $("#textDisplayed2").css({ "display": "block", "margin-left": "auto", "margin-right": "auto", "width": "72%" })
+        $("#textDisplayed3").css({ "text-align": "center", "font-size": "100%", "padding-top": "25px" });
+        $("#textDisplayed4").css({ "text-align": "center", "font-size": "100%", "padding-top": "25px" });
+    });
+
+    //click handler
+
+    $('#btn_2').css({ "display": "block", "margin-left": "auto", "margin-right": "auto", "width": "30%" })
+    $('#btn_2').click(function () {
+        $("html,body").css({ "height": "100%" });
+        $("#button2").hide();
+        $("#button").show();
+        $(".topbar2").hide();
+        $(".container2").show();
+        $("#textDisplayed1").hide();
+        $("#textDisplayed2").hide();
+        $("#textDisplayed11").hide();
+        $("#textDisplayed4").hide();
+        $("#textDisplayed22").hide();
+        $("#textDisplayed3").hide();
+    });
+
+</script>
+<br>
+<br>
+<br>
+
+</html>
